@@ -1,0 +1,35 @@
+# Blueprint для Render: https://render.com/docs/blueprint-spec
+# Подключите репозиторий и задайте секреты в Dashboard (не коммитьте .env).
+
+services:
+  - type: web
+    name: cosmetics-bot
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py
+    healthCheckPath: /health
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: MANAGER_IDS
+        sync: false
+      - key: PAYMENT_DETAILS
+        sync: false
+      - key: MINI_APP_URL
+        sync: false
+      - key: PUBLIC_API_URL
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: PROXY_URL
+        sync: false
+      - key: DATABASE_PATH
+        value: bot_data.db
+      - key: DATABASE_URL
+        sync: false
+      - key: DEBUG
+        value: "false"
+      # PORT задаётся Render автоматически

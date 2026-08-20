@@ -1,0 +1,1748 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>Премиальная косметика</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --card: #ffffff;
+      --text: #111111;
+      --muted: #6b6b6b;
+      --gold: #6a6a6a;
+      --gold-dark: #555555;
+      --line: #ececec;
+      --danger: #b42318;
+      --nav-h: 64px;
+      --safe-b: env(safe-area-inset-bottom, 0px);
+      --btn: #6a6a6a;
+      --btn-active: #555555;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: #ffffff;
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: calc(var(--nav-h) + var(--safe-b) + 12px);
+    }
+    button, a { color: inherit; }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 10px 10px 0; }
+    .hero-wrap {
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 12px;
+      background: #f3f3f3;
+    }
+    .hero { width: 100%; display: block; object-fit: cover; max-height: 160px; }
+    .shop-row { display: flex; gap: 12px; align-items: center; margin-bottom: 10px; }
+    .shop-logo { width: 56px; height: 56px; border-radius: 14px; object-fit: cover; background: #f3f3f3; }
+    .shop-name { margin: 0; font-size: 20px; font-weight: 700; color: #111; }
+    .shop-meta { color: var(--muted); font-size: 13px; margin-top: 2px; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    h2 { font-size: 18px; margin: 8px 0 12px; color: #111; }
+    .groups {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 10px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 6px 4px 14px;
+      margin: 0 0 14px;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+    .groups::-webkit-scrollbar { height: 0; }
+    .group {
+      flex: 0 0 118px;
+      width: 118px;
+      min-width: 118px;
+      scroll-snap-align: start;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 14px;
+      padding: 0;
+      overflow: hidden;
+      cursor: pointer;
+      text-align: center;
+      color: #111 !important;
+      -webkit-tap-highlight-color: transparent;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    .group:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    }
+    .group.active {
+      outline: none;
+      border: 2px solid #111;
+      box-shadow: none;
+    }
+    .group-media {
+      width: 100%;
+      height: 0;
+      padding-bottom: 100%;
+      position: relative;
+      background: #f0ebe3;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .group-cover {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      min-width: 100%;
+      min-height: 100%;
+      object-fit: cover;
+      object-position: center center;
+      display: block;
+      background: #f0ebe3;
+    }
+    .group-title {
+      width: 100%;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 8px 8px 2px;
+      line-height: 1.25;
+      color: #111 !important;
+      text-align: center;
+      min-height: 2.6em;
+      max-height: 2.6em;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      box-sizing: content-box;
+    }
+    .group-count {
+      width: 100%;
+      font-size: 11px;
+      color: var(--muted) !important;
+      padding: 0 8px 10px;
+      text-align: center;
+      margin-top: auto;
+    }
+    .products {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      align-items: stretch;
+    }
+    .product {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      color: #111;
+      height: 100%;
+    }
+    .product-media {
+      width: 100%;
+      height: 0;
+      padding-bottom: 100%;
+      position: relative;
+      flex-shrink: 0;
+      background: #e8e8e8;
+      overflow: hidden;
+    }
+    .product-media img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      min-width: 100%;
+      min-height: 100%;
+      object-fit: cover;
+      object-position: center center;
+      display: block;
+      /* лёгкий зум убирает белые кромки/полосы по краям исходных фото */
+      transform: scale(1.08);
+      transform-origin: center center;
+    }
+    .product-body {
+      padding: 10px;
+      display: grid;
+      grid-template-rows: 3.9em auto auto auto auto;
+      gap: 6px;
+      flex: 1;
+      align-content: start;
+    }
+    .product-name {
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.3;
+      min-height: 3.9em;
+      max-height: 3.9em;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      color: #111;
+    }
+    .product-brand {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 600;
+      min-height: 1.2em;
+      line-height: 1.3;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    .product-price { font-size: 16px; font-weight: 700; color: #111; }
+    .product-stock { font-size: 12px; color: var(--muted); min-height: 1.2em; }
+    .btn {
+      border: none;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--btn) !important;
+      color: #fff !important;
+    }
+    .btn:disabled { opacity: 0.45; cursor: default; }
+    .btn-gold { background: var(--btn) !important; color: #fff !important; }
+    .btn-gold:active { background: var(--btn-active) !important; }
+    .btn-ghost { background: #f3f3f3 !important; color: #111 !important; }
+    .btn-cart {
+      background: var(--btn) !important;
+      color: #fff !important;
+      border: none;
+    }
+    .btn-cart:active { background: var(--btn-active) !important; }
+    .btn-fav {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-fav svg { width: 20px; height: 20px; display: block; }
+    .btn-fav.on { color: #c45c26; }
+    .row-actions { display: grid; grid-template-columns: 28px 1fr; gap: 8px; align-items: center; margin-top: auto; min-height: 42px; }
+    .row-actions .btn { width: 100%; height: 42px; display: flex; align-items: center; justify-content: center; }
+    .btn-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      align-items: stretch;
+      margin-top: 10px;
+    }
+    .btn-row .btn {
+      width: 100%;
+      min-height: 42px;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 10px;
+    }
+    .search-box { display: flex; gap: 8px; margin-bottom: 0; }
+    .catalog-tools { margin: 0 0 12px; }
+    .catalog-filters {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .catalog-filters select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 11px 12px;
+      font-size: 14px;
+      background: #fff;
+      color: #111;
+    }
+    /* Логотипы брендов — contain, чтобы горизонтальные лого не обрезались */
+    #brandsGroups .group-media {
+      background: #ffffff;
+    }
+    #brandsGroups .group-cover {
+      object-fit: contain;
+      background: #ffffff;
+      transform: none;
+    }
+    .search-box input, .field input, .field textarea, .field select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 15px;
+      background: #fff;
+      color: #111;
+    }
+    .field { margin-bottom: 10px; }
+    .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; font-weight: 600; }
+    .addr-wrap { position: relative; }
+    .addr-suggest {
+      display: none;
+      margin: 0 0 6px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      overflow: hidden;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+      max-height: 180px;
+      overflow-y: auto;
+    }
+    .addr-suggest.show { display: block; }
+    .addr-suggest button {
+      width: 100%;
+      text-align: left;
+      border: none;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+      color: #111 !important;
+      padding: 10px 12px;
+      font-size: 13px;
+      line-height: 1.35;
+      cursor: pointer;
+    }
+    .addr-suggest button:last-child { border-bottom: none; }
+    .addr-suggest button:active,
+    .addr-suggest button:hover { background: #f5f5f5; }
+    .card-soft {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+    .muted { color: var(--muted); font-size: 13px; }
+    .empty { color: var(--muted); padding: 16px 4px; font-size: 14px; }
+    .bottom-nav {
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      height: calc(var(--nav-h) + var(--safe-b));
+      padding-bottom: var(--safe-b);
+      background: #fff;
+      border-top: 1px solid var(--line);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      z-index: 50;
+    }
+    .nav-btn {
+      border: none;
+      background: transparent;
+      color: var(--muted) !important;
+      font-size: 11px;
+      font-weight: 600;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      cursor: pointer;
+      position: relative;
+    }
+    .nav-btn.active { color: #111 !important; }
+    .nav-ico { width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; }
+    .nav-ico svg { width: 22px; height: 22px; display: block; }
+    .nav-badge {
+      position: absolute;
+      top: 6px;
+      right: calc(50% - 18px);
+      min-width: 16px;
+      height: 16px;
+      border-radius: 8px;
+      background: #111;
+      color: #fff;
+      font-size: 10px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 0 4px;
+    }
+    .nav-badge.show { display: inline-flex; }
+    .modal-bg {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45);
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 80;
+      padding: 12px;
+    }
+    .modal {
+      width: 100%;
+      max-width: 560px;
+      max-height: 92vh;
+      overflow: auto;
+      background: #fff;
+      border-radius: 20px;
+      padding-bottom: 16px;
+      position: relative;
+    }
+    .modal-x {
+      position: absolute; top: 10px; right: 10px; z-index: 2;
+      width: 36px; height: 36px; border: none; border-radius: 50%;
+      background: rgba(0,0,0,0.55); color: #fff; font-size: 22px; cursor: pointer;
+    }
+    .modal-media {
+      width: 100%;
+      height: 0;
+      padding-bottom: 100%;
+      position: relative;
+      background: #e8e8e8;
+      overflow: hidden;
+    }
+    .modal-media img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      min-width: 100%;
+      min-height: 100%;
+      object-fit: cover;
+      object-position: center center;
+      display: block;
+      transform: scale(1.08);
+      transform-origin: center center;
+    }
+    .modal-body { padding: 16px 16px 0; display: flex; flex-direction: column; gap: 8px; }
+    .modal-name { margin: 0; font-size: 20px; font-weight: 700; color: #111; }
+    .modal-label { font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); margin-top: 6px; }
+    .modal-desc { margin: 0; font-size: 14px; line-height: 1.5; white-space: pre-wrap; color: #111; }
+    .modal-actions { display: flex; gap: 8px; padding: 14px 16px 0; }
+    .modal-actions .btn { flex: 1; }
+    .cart-line { display: flex; justify-content: space-between; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+    .qty { display: inline-flex; align-items: center; gap: 6px; }
+    .qty button { width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--line); background: #fff; cursor: pointer; color: #111; }
+    .admin-item { border-bottom: 1px solid var(--line); padding: 12px 0; }
+    .admin-item strong { display: block; margin-bottom: 4px; color: #111; }
+    .admin-item-top { display: flex; gap: 10px; align-items: flex-start; }
+    .admin-item-meta { flex: 1; min-width: 0; }
+    .admin-preview {
+      width: 96px; height: 96px; border-radius: 12px; object-fit: cover;
+      background: #f3f3f3; border: 1px solid var(--line); display: block; margin-bottom: 8px;
+    }
+    /* Логотипы брендов часто горизонтальные — не обрезаем */
+    .admin-preview-brand {
+      width: 100%;
+      max-width: 280px;
+      height: 120px;
+      border-radius: 14px;
+      object-fit: contain;
+      object-position: center;
+      background: #fff;
+      border: 1px solid var(--line);
+      display: block;
+      margin-bottom: 8px;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+    .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+    .tab {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: #111 !important;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .tab.active { background: #111; color: #fff !important; border-color: #111; }
+    .points { font-size: 28px; font-weight: 700; color: #111; }
+    .pay-box {
+      margin-top: 12px;
+      padding: 14px;
+      border: 2px solid #111;
+      border-radius: 14px;
+      background: #fff8e8;
+      color: #111;
+    }
+    .pay-box-title { font-size: 15px; font-weight: 700; margin: 0 0 6px; }
+    .pay-box-amount { font-size: 24px; font-weight: 800; margin: 8px 0 12px; }
+    .pay-box-details {
+      white-space: pre-wrap;
+      line-height: 1.45;
+      font-size: 15px;
+      font-weight: 600;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      word-break: break-word;
+    }
+    .pay-box-note { margin-top: 10px; font-size: 13px; color: var(--muted); line-height: 1.35; }
+    @media (min-width: 640px) {
+      .products { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .group {
+        flex-basis: 132px;
+        width: 132px;
+        min-width: 132px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero-wrap">
+      <picture>
+        <source media="(max-width: 640px)" srcset="static/img/banner-mobile.png" />
+        <img class="hero" id="heroImg" src="static/img/banner-desktop.png" alt="" />
+      </picture>
+    </div>
+    <div class="shop-row">
+      <img class="shop-logo" id="shopLogo" src="static/img/logo.png" alt="" />
+      <div>
+        <h1 class="shop-name">Премиальная косметика</h1>
+        <div class="shop-meta">Оригинальный уход · доставка по РФ</div>
+      </div>
+    </div>
+
+    <section class="panel active" id="panel-catalog">
+      <h2>Категории</h2>
+      <div class="groups" id="groups"></div>
+      <h2>Бренды</h2>
+      <div class="groups" id="brandsGroups"></div>
+      <div class="catalog-tools">
+        <div class="search-box">
+          <input id="searchInput" placeholder="Поиск по названию или бренду…" />
+        </div>
+        <div class="catalog-filters">
+          <select id="sortSelect" aria-label="Сортировка">
+            <option value="default">По умолчанию</option>
+            <option value="price_asc">Цена по возрастанию</option>
+            <option value="price_desc">Цена по убыванию</option>
+          </select>
+        </div>
+      </div>
+      <h2 id="catalogTitle">Каталог</h2>
+      <div class="products" id="products"></div>
+    </section>
+
+    <section class="panel" id="panel-favorites">
+      <h2>Избранное</h2>
+      <div class="products" id="favProducts"></div>
+    </section>
+
+    <section class="panel" id="panel-cart">
+      <h2>Корзина</h2>
+      <div class="card-soft" id="cartBox">
+        <div id="cartItems"></div>
+        <div class="cart-line"><span>Товары</span><strong id="cartGoods">0 ₽</strong></div>
+        <div class="cart-line"><span>Доставка</span><strong id="cartDelivery">0 ₽</strong></div>
+        <div class="cart-line"><span>Итого</span><strong id="cartTotal">0 ₽</strong></div>
+        <div class="field" style="margin-top:12px">
+          <label>Списать баллы (до 100% заказа)</label>
+          <input id="pointsInput" type="number" min="0" value="0" />
+          <div class="muted" id="pointsHint">Доступно: 0</div>
+        </div>
+        <div class="cart-line"><span>К оплате</span><strong id="cartCash">0 ₽</strong></div>
+        <div class="muted" id="earnHint" style="margin-top:6px"></div>
+      </div>
+      <div class="field"><label>ФИО</label><input id="nameInput" /></div>
+      <div class="field"><label>Телефон</label><input id="phoneInput" type="tel" /></div>
+      <div class="field addr-wrap">
+        <label>Адрес</label>
+        <div class="addr-suggest" id="addressSuggest"></div>
+        <input id="addressInput" autocomplete="street-address" placeholder="Город, улица, дом" />
+      </div>
+      <button class="btn btn-gold" id="submitOrderBtn" type="button" style="width:100%">Оформить заказ</button>
+      <div id="orderMsg" style="display:none"></div>
+    </section>
+
+    <section class="panel" id="panel-account">
+      <h2>Аккаунт</h2>
+      <div class="card-soft">
+        <div class="muted">Баллы лояльности</div>
+        <div class="points" id="accPoints">0</div>
+        <div class="muted" id="accTier"></div>
+        <div class="muted" id="accProgress" style="margin-top:6px"></div>
+      </div>
+      <div class="card-soft">
+        <div class="field"><label>ФИО</label><input id="accName" /></div>
+        <div class="field"><label>Телефон</label><input id="accPhone" type="tel" /></div>
+        <div class="field addr-wrap">
+          <label>Адрес</label>
+          <div class="addr-suggest" id="accAddressSuggest"></div>
+          <input id="accAddress" autocomplete="street-address" placeholder="Город, улица, дом" />
+        </div>
+        <button class="btn btn-gold" id="saveProfileBtn" type="button" style="width:100%">Сохранить</button>
+        <div class="muted" id="profileMsg" style="margin-top:8px;display:none"></div>
+      </div>
+      <div class="card-soft">
+        <strong>История заказов</strong>
+        <div id="orderHistory" class="muted" style="margin-top:8px">Загрузка…</div>
+      </div>
+      <div class="card-soft" id="adminBox" style="display:none">
+        <strong>Админ · товары, категории и бренды</strong>
+        <div class="tabs" style="margin-top:10px">
+          <button class="tab active" type="button" data-admin="products">Товары</button>
+          <button class="tab" type="button" data-admin="categories">Категории</button>
+          <button class="tab" type="button" data-admin="brands">Бренды</button>
+          <button class="tab" type="button" data-admin="new">+ Товар</button>
+        </div>
+        <div id="adminBody"></div>
+      </div>
+      <button class="btn btn-ghost" id="btnWrite" type="button" style="width:100%;margin-top:8px">Написать менеджеру</button>
+    </section>
+  </div>
+
+  <nav class="bottom-nav" aria-label="Меню">
+    <button class="nav-btn active" type="button" data-panel="catalog">
+      <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span>Каталог
+    </button>
+    <button class="nav-btn" type="button" data-panel="favorites">
+      <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/></svg></span>Избранное
+    </button>
+    <button class="nav-btn" type="button" data-panel="cart">
+      <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 7h15l-1.5 9h-12z"/><path d="M6 7L5 3H2"/><circle cx="9" cy="20" r="1.2"/><circle cx="17" cy="20" r="1.2"/></svg></span>Корзина<span class="nav-badge" id="cartBadge">0</span>
+    </button>
+    <button class="nav-btn" type="button" data-panel="account">
+      <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.5"/><path d="M5 19a7 7 0 0 1 14 0"/></svg></span>Аккаунт
+    </button>
+  </nav>
+
+  <div class="modal-bg" id="productModalBg" aria-hidden="true">
+    <div class="modal" role="dialog">
+      <button class="modal-x" id="productModalCloseX" type="button" aria-label="Закрыть">×</button>
+      <div class="modal-media"><img id="productModalImg" alt="" /></div>
+      <div class="modal-body">
+        <h3 class="modal-name" id="productModalName"></h3>
+        <div class="product-brand" id="productModalBrand"></div>
+        <div class="product-price" id="productModalPrice"></div>
+        <div class="product-stock" id="productModalStock"></div>
+        <div class="modal-label">Описание</div>
+        <p class="modal-desc" id="productModalDesc"></p>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="productModalFav" type="button">В избранное</button>
+        <button class="btn btn-cart" id="productModalAdd" type="button">В корзину</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const PUBLIC_API_URL = "";
+    const IS_HTTP = location.protocol === "http:" || location.protocol === "https:";
+    const API_BASE_URL = (PUBLIC_API_URL || (IS_HTTP ? location.origin : "http://localhost:8080")).replace(/\/$/, "");
+    const PLACEHOLDER_IMG =
+      "data:image/svg+xml," +
+      encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect width="400" height="400" fill="#f0f0f0"/><text x="50%" y="54%" text-anchor="middle" fill="#9a9a9a" font-size="64">🛍️</text></svg>');
+
+    const COVER_FALLBACK = {
+      aromati: "static/img/aromati.png",
+      polost: "static/img/polost-rta.png",
+      telom: "static/img/uhod-za-telom.png",
+      stajling: "static/img/stajling.png",
+      licom: "static/img/uhod-za-licom.png",
+      shampun: "static/img/shampun.png",
+      kondicioner: "static/img/kondicioner.png",
+      brite: "static/img/brite.png",
+      boroda: "static/img/boroda.png",
+    };
+
+    const HEART_OUT =
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/></svg>';
+    const HEART_ON =
+      '<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.2"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/></svg>';
+
+    const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    if (tg) { tg.ready(); tg.expand(); }
+
+    const state = {
+      products: [],
+      categories: [],
+      brands: [],
+      cart: {},
+      favorites: new Set(),
+      user: null,
+      activeGroup: null,
+      activeProductId: null,
+      panel: "catalog",
+      adminTab: "products",
+      editingProductId: null,
+      query: "",
+      selectedBrand: "",
+      sortBy: "default",
+    };
+
+    function initData() { return (tg && tg.initData) || ""; }
+    function money(v) { return `${Number(v).toLocaleString("ru-RU")} ₽`; }
+    function escapeHtml(s) {
+      return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+    }
+    function IMG(path) {
+      const p = String(path || "").replace(/^\//, "");
+      return API_BASE_URL ? `${API_BASE_URL}/${p}` : p;
+    }
+    function resolveMedia(url) {
+      if (!url) return PLACEHOLDER_IMG;
+      const u = String(url).trim();
+      if (/^(https?:|data:)/i.test(u)) return u;
+      return IMG(u.replace(/^\//, ""));
+    }
+    function cover(p) { return resolveMedia((p && p.image_url) || ""); }
+    function categoryCover(c) {
+      if (c && c.image_url) return resolveMedia(c.image_url);
+      const id = String((c && c.id) || "").toLowerCase();
+      if (COVER_FALLBACK[id]) return IMG(COVER_FALLBACK[id]);
+      return IMG("static/img/banner-products.png");
+    }
+    function pluralAds(n) {
+      const abs = Math.abs(n) % 100;
+      const d = abs % 10;
+      if (abs > 10 && abs < 20) return `${n} товаров`;
+      if (d === 1) return `${n} товар`;
+      if (d >= 2 && d <= 4) return `${n} товара`;
+      return `${n} товаров`;
+    }
+
+    function brandAvatarFallback(name) {
+      const n = String(name || "").trim();
+      const first = escapeHtml((n.charAt(0) || "?").toUpperCase());
+      // Детерминированный оттенок по названию бренда.
+      let hash = 0;
+      for (let i = 0; i < n.length; i++) hash = (hash * 31 + n.charCodeAt(i)) >>> 0;
+      const hue = hash % 360;
+      const bg = `hsl(${hue} 60% 92%)`;
+      const fg = `hsl(${hue} 45% 30%)`;
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+        <rect width="200" height="200" rx="32" fill="${bg}"/>
+        <circle cx="100" cy="100" r="74" fill="white" opacity="0.9"/>
+        <text x="100" y="128" font-size="72" text-anchor="middle" font-family="Arial, sans-serif" fill="${fg}" font-weight="800">${first}</text>
+      </svg>`;
+      return "data:image/svg+xml," + encodeURIComponent(svg);
+    }
+
+    function countInCategory(catId) {
+      return state.products.filter(p => (p.category || "") === catId).length;
+    }
+
+    function countInBrand(brandName) {
+      const want = String(brandName || "").trim().toLowerCase();
+      if (!want) return 0;
+      return state.products.filter(p => productBrand(p).toLowerCase() === want).length;
+    }
+    function deliveryOf(total) { return total >= 7000 ? 0 : 300; }
+    function cartCount() { return Object.values(state.cart).reduce((a,b)=>a+b,0); }
+    function cartGoods() {
+      return Object.entries(state.cart).reduce((sum, [id, q]) => {
+        const p = state.products.find(x => String(x.id) === String(id));
+        return sum + (p ? p.price * q : 0);
+      }, 0);
+    }
+
+    async function api(path, body, method="POST") {
+      const opts = { method, headers: {} };
+      if (body !== undefined) {
+        opts.headers["Content-Type"] = "application/json";
+        opts.body = JSON.stringify({ initData: initData(), ...body });
+      }
+      const res = await fetch(`${API_BASE_URL}${path}`, opts);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.success === false) {
+        const err = new Error(data.detail || data.error || `HTTP ${res.status}`);
+        err.payload = data;
+        throw err;
+      }
+      return data;
+    }
+
+    function bindAddressSuggest(inputId, listId) {
+      const input = document.getElementById(inputId);
+      const list = document.getElementById(listId);
+      if (!input || !list) return;
+      let timer = null;
+      let seq = 0;
+
+      function hideKeyboard() {
+        try { input.blur(); } catch (_) {}
+        try { if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); } catch (_) {}
+      }
+
+      function hide() {
+        list.classList.remove("show");
+        list.innerHTML = "";
+      }
+
+      function pick(text) {
+        input.value = text;
+        hide();
+        hideKeyboard();
+        persistAddressSoon(text);
+      }
+
+      function render(items) {
+        list.innerHTML = "";
+        if (!items.length) { hide(); return; }
+        items.forEach(text => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.textContent = text;
+          btn.onmousedown = (e) => { e.preventDefault(); };
+          btn.onclick = () => pick(text);
+          list.appendChild(btn);
+        });
+        list.classList.add("show");
+      }
+
+      input.addEventListener("input", () => {
+        const q = input.value.trim();
+        clearTimeout(timer);
+        if (q.length < 3) { hide(); return; }
+        timer = setTimeout(async () => {
+          const my = ++seq;
+          try {
+            const data = await api(`/api/address-suggest?q=${encodeURIComponent(q)}`, undefined, "GET");
+            if (my !== seq) return;
+            render(Array.isArray(data.suggestions) ? data.suggestions : []);
+          } catch (_) {
+            if (my === seq) hide();
+          }
+        }, 280);
+      });
+
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          hide();
+          hideKeyboard();
+          persistAddressSoon(input.value);
+        }
+      });
+
+      input.addEventListener("blur", () => {
+        setTimeout(() => {
+          hide();
+          persistAddressSoon(input.value);
+        }, 180);
+      });
+    }
+
+    let _addrSaveTimer = null;
+    function persistAddressSoon(value) {
+      clearTimeout(_addrSaveTimer);
+      _addrSaveTimer = setTimeout(() => { persistAddress(value).catch(() => {}); }, 300);
+    }
+    async function persistAddress(value) {
+      const addr = String(value == null ? "" : value).trim();
+      if (!state.user) return;
+      if (String(state.user.address || "").trim() === addr) {
+        const a = document.getElementById("addressInput");
+        const b = document.getElementById("accAddress");
+        if (a && a.value.trim() !== addr) a.value = addr;
+        if (b && b.value.trim() !== addr) b.value = addr;
+        return;
+      }
+      try {
+        const data = await api("/api/profile", {
+          name: state.user.name || "",
+          phone: state.user.phone || "",
+          address: addr,
+        });
+        state.user = data.user || { ...state.user, address: addr };
+        const a = document.getElementById("addressInput");
+        const b = document.getElementById("accAddress");
+        if (a) a.value = state.user.address || addr;
+        if (b) b.value = state.user.address || addr;
+      } catch (e) {
+        console.warn("address save", e);
+      }
+    }
+
+    function setPanel(name) {
+      state.panel = name;
+      document.querySelectorAll(".panel").forEach(el => el.classList.toggle("active", el.id === `panel-${name}`));
+      document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.toggle("active", btn.dataset.panel === name));
+      if (name === "favorites") renderFavProducts();
+      if (name === "cart") renderCart();
+      if (name === "account") renderAccount();
+    }
+
+    function productBrand(p) {
+      return String((p && p.brand) || "").trim();
+    }
+
+    function uniqueBrandsFromProducts() {
+      const set = new Set();
+      state.products.forEach((p) => {
+        const b = productBrand(p);
+        if (b) set.add(b);
+      });
+      return Array.from(set).sort((a, b) => a.localeCompare(b, "ru"));
+    }
+
+    function brandsForView() {
+      const raw = Array.isArray(state.brands) && state.brands.length
+        ? state.brands
+        : uniqueBrandsFromProducts().map((name) => ({ name, photo: null }));
+      // Убираем дубликаты брендов (Hey Joe / Hey joe и т.п.)
+      const seen = new Set();
+      const out = [];
+      for (const b of raw) {
+        const name = String((b && b.name) || "").trim();
+        if (!name) continue;
+        const key = name.toLowerCase();
+        if (seen.has(key)) continue;
+        seen.add(key);
+        out.push({ name, photo: b.photo || null });
+      }
+      return out.sort((a, b) => a.name.localeCompare(b.name, "ru"));
+    }
+
+    function renderBrands() {
+      const root = document.getElementById("brandsGroups");
+      if (!root) return;
+
+      const brands = brandsForView();
+      root.innerHTML = "";
+
+      const allBtn = document.createElement("button");
+      allBtn.type = "button";
+      allBtn.className = "group" + (!state.selectedBrand ? " active" : "");
+      allBtn.innerHTML = `
+        <div class="group-media">
+          <img class="group-cover" src="${IMG("static/img/all-brands.png")}" alt="Все бренды"/>
+        </div>
+        <div class="group-title">Все бренды</div>
+        <div class="group-count">${pluralAds(state.products.length)}</div>
+      `;
+      allBtn.onclick = () => {
+        state.selectedBrand = "";
+        renderBrands();
+        renderProducts();
+      };
+      root.appendChild(allBtn);
+
+      brands.forEach((brand) => {
+        const name = String((brand && brand.name) || "").trim();
+        if (!name) return;
+        const nameLower = name.toLowerCase();
+
+        const photo = brand && brand.photo ? resolveMedia(brand.photo) : "";
+        const coverSrc = photo || brandAvatarFallback(name);
+        const n = countInBrand(name);
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "group" + (state.selectedBrand && state.selectedBrand.toLowerCase() === nameLower ? " active" : "");
+        btn.innerHTML = `
+          <div class="group-media">
+            <img class="group-cover" src="${coverSrc}" alt="${escapeHtml(name)}" loading="lazy"/>
+          </div>
+          <div class="group-title">${escapeHtml(name)}</div>
+          <div class="group-count">${pluralAds(n)}</div>
+        `;
+        const img = btn.querySelector("img");
+        if (img && photo) {
+          img.onerror = () => { img.src = brandAvatarFallback(name); };
+        }
+        btn.onclick = () => {
+          state.selectedBrand =
+            state.selectedBrand && state.selectedBrand.toLowerCase() === nameLower ? "" : name;
+          renderBrands();
+          renderProducts();
+        };
+        root.appendChild(btn);
+      });
+    }
+
+    function filteredProducts() {
+      let list = state.products.slice();
+      if (state.activeGroup) list = list.filter(p => (p.category || "") === state.activeGroup);
+      if (state.selectedBrand) {
+        const want = state.selectedBrand.toLowerCase();
+        list = list.filter(p => productBrand(p).toLowerCase() === want);
+      }
+      const q = (state.query || "").trim().toLowerCase();
+      if (q) {
+        list = list.filter(p =>
+          `${p.name || ""} ${p.description || ""} ${productBrand(p)}`.toLowerCase().includes(q)
+        );
+      }
+      if (state.sortBy === "price_asc") {
+        list.sort((a, b) => Number(a.price || 0) - Number(b.price || 0));
+      } else if (state.sortBy === "price_desc") {
+        list.sort((a, b) => Number(b.price || 0) - Number(a.price || 0));
+      }
+      return list;
+    }
+
+    function renderGroups() {
+      const root = document.getElementById("groups");
+      root.innerHTML = "";
+      const all = document.createElement("button");
+      all.type = "button";
+      all.className = "group" + (state.activeGroup === null ? " active" : "");
+      all.innerHTML = `
+        <div class="group-media">
+          <img class="group-cover" src="${IMG("static/img/banner-products.png")}" alt=""/>
+        </div>
+        <div class="group-title">Все</div>
+        <div class="group-count">${pluralAds(state.products.length)}</div>
+      `;
+      all.onclick = () => { state.activeGroup = null; renderGroups(); renderProducts(); };
+      root.appendChild(all);
+      state.categories.forEach(c => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "group" + (state.activeGroup === c.id ? " active" : "");
+        const n = countInCategory(c.id);
+        btn.innerHTML = `
+          <div class="group-media">
+            <img class="group-cover" src="${categoryCover(c)}" alt=""/>
+          </div>
+          <div class="group-title">${escapeHtml(c.title)}</div>
+          <div class="group-count">${pluralAds(n)}</div>
+        `;
+        btn.onclick = () => { state.activeGroup = c.id; renderGroups(); renderProducts(); };
+        root.appendChild(btn);
+      });
+    }
+
+    function productCard(p) {
+      const card = document.createElement("article");
+      card.className = "product";
+      const favOn = state.favorites.has(p.id);
+      const action = p.stock > 0
+        ? `<button class="btn btn-cart" data-add="${p.id}" type="button">В корзину</button>`
+        : `<button class="btn btn-cart" type="button" disabled>Нет в наличии</button>`;
+      card.innerHTML = `
+        <div class="product-media"><img src="${cover(p)}" alt="${escapeHtml(p.name)}" loading="lazy"/></div>
+        <div class="product-body">
+          <div class="product-name">${escapeHtml(p.name || "")}</div>
+          <div class="product-brand">${productBrand(p) ? "Бренд: " + escapeHtml(productBrand(p)) : "Бренд: —"}</div>
+          <div class="product-price">${money(p.price)}</div>
+          <div class="product-stock">В наличии: ${Number(p.stock || 0)}</div>
+          <div class="row-actions">
+            <button class="btn-fav ${favOn ? "on" : ""}" data-fav="${p.id}" type="button" aria-label="Избранное">${favOn ? HEART_ON : HEART_OUT}</button>
+            ${action}
+          </div>
+        </div>`;
+      card.addEventListener("click", (e) => {
+        if (e.target.closest("[data-add]") || e.target.closest("[data-fav]")) return;
+        openProduct(p);
+      });
+      const add = card.querySelector("[data-add]");
+      if (add) add.onclick = (e) => { e.stopPropagation(); addToCart(p.id); };
+      const fav = card.querySelector("[data-fav]");
+      if (fav) fav.onclick = (e) => { e.stopPropagation(); toggleFav(p.id); };
+      return card;
+    }
+
+    function renderProductList(targetId, list) {
+      const root = document.getElementById(targetId);
+      root.innerHTML = "";
+      if (!list.length) {
+        root.innerHTML = `<div class="empty">Ничего не найдено</div>`;
+        return;
+      }
+      list.forEach(p => root.appendChild(productCard(p)));
+    }
+
+    function renderProducts() {
+      const cat = state.categories.find(c => c.id === state.activeGroup);
+      document.getElementById("catalogTitle").textContent = cat ? cat.title : "Каталог";
+      renderProductList("products", filteredProducts());
+    }
+    function renderFavProducts() {
+      renderProductList("favProducts", state.products.filter(p => state.favorites.has(p.id)));
+    }
+
+    function updateCartBadge() {
+      const n = cartCount();
+      const badge = document.getElementById("cartBadge");
+      badge.textContent = String(n);
+      badge.classList.toggle("show", n > 0);
+    }
+
+    let _cartSaveTimer = null;
+    function persistCartSoon() {
+      clearTimeout(_cartSaveTimer);
+      _cartSaveTimer = setTimeout(() => { persistCart().catch(() => {}); }, 250);
+    }
+    async function persistCart() {
+      if (!state.user || !state.user.id) return;
+      try {
+        await api("/api/cart", { cart: state.cart });
+      } catch (e) {
+        console.warn("cart save", e);
+      }
+    }
+
+    function applyCart(raw) {
+      const next = {};
+      if (raw && typeof raw === "object") {
+        Object.entries(raw).forEach(([id, q]) => {
+          const qty = Number(q);
+          if (Number(id) > 0 && qty > 0) next[String(id)] = qty;
+        });
+      }
+      state.cart = next;
+      updateCartBadge();
+    }
+
+    function addToCart(id) {
+      const p = state.products.find(x => x.id === id);
+      if (!p || p.stock <= 0) return;
+      const cur = state.cart[id] || 0;
+      if (cur >= p.stock) return;
+      state.cart[id] = cur + 1;
+      updateCartBadge();
+      persistCartSoon();
+      if (state.panel === "cart") renderCart();
+    }
+
+    async function toggleFav(id) {
+      const on = !state.favorites.has(id);
+      try {
+        const data = await api("/api/favorites", { product_id: id, on });
+        state.favorites = new Set(data.favorite_ids || []);
+        renderProducts();
+        if (state.panel === "favorites") renderFavProducts();
+        if (state.activeProductId === id) syncFavBtn(id);
+      } catch (e) {
+        alert(e.message || "Не удалось обновить избранное");
+      }
+    }
+
+    function syncFavBtn(id) {
+      const btn = document.getElementById("productModalFav");
+      const on = state.favorites.has(id);
+      btn.textContent = on ? "В избранном" : "В избранное";
+      btn.classList.toggle("btn-gold", on);
+      btn.classList.toggle("btn-ghost", !on);
+    }
+
+    function openProduct(p) {
+      state.activeProductId = p.id;
+      document.getElementById("productModalImg").src = cover(p);
+      document.getElementById("productModalName").textContent = p.name || "";
+      const brandEl = document.getElementById("productModalBrand");
+      const brand = productBrand(p);
+      brandEl.textContent = brand ? "Бренд: " + brand : "Бренд: —";
+      document.getElementById("productModalPrice").textContent = money(p.price);
+      document.getElementById("productModalStock").textContent =
+        "В наличии: " + String(Number(p.stock || 0));
+      document.getElementById("productModalDesc").textContent =
+        (p.description || "").trim() || "Описание пока не добавлено.";
+      const add = document.getElementById("productModalAdd");
+      add.disabled = p.stock <= 0;
+      add.textContent = p.stock > 0 ? "В корзину" : "Нет в наличии";
+      syncFavBtn(p.id);
+      const bg = document.getElementById("productModalBg");
+      bg.style.display = "flex";
+      bg.setAttribute("aria-hidden", "false");
+    }
+    function closeProduct() {
+      const bg = document.getElementById("productModalBg");
+      bg.style.display = "none";
+      bg.setAttribute("aria-hidden", "true");
+      state.activeProductId = null;
+    }
+
+    function renderCart() {
+      const box = document.getElementById("cartItems");
+      const entries = Object.entries(state.cart);
+      if (!entries.length) {
+        box.innerHTML = `<div class="empty">Корзина пуста</div>`;
+      } else {
+        box.innerHTML = "";
+        entries.forEach(([id, q]) => {
+          const p = state.products.find(x => String(x.id) === String(id));
+          if (!p) return;
+          const row = document.createElement("div");
+          row.className = "cart-line";
+          row.innerHTML = `<div><strong>${escapeHtml(p.name)}</strong><div class="muted">${money(p.price)}</div></div>
+            <div class="qty">
+              <button type="button" data-dec="${id}">−</button>
+              <span>${q}</span>
+              <button type="button" data-inc="${id}">+</button>
+            </div>`;
+          box.appendChild(row);
+        });
+        box.querySelectorAll("[data-dec]").forEach(b => b.onclick = () => {
+          const id = b.getAttribute("data-dec");
+          state.cart[id] = (state.cart[id] || 0) - 1;
+          if (state.cart[id] <= 0) delete state.cart[id];
+          updateCartBadge(); renderCart(); persistCartSoon();
+        });
+        box.querySelectorAll("[data-inc]").forEach(b => b.onclick = () => {
+          addToCart(Number(b.getAttribute("data-inc")));
+        });
+      }
+      const goods = cartGoods();
+      const delivery = entries.length ? deliveryOf(goods) : 0;
+      const gross = goods + delivery;
+      const pointsAvail = state.user ? Number(state.user.loyalty_points || 0) : 0;
+      const pointsInput = document.getElementById("pointsInput");
+      let spend = Math.max(0, Math.min(Number(pointsInput.value || 0), pointsAvail, gross));
+      pointsInput.value = String(spend);
+      document.getElementById("cartGoods").textContent = money(goods);
+      document.getElementById("cartDelivery").textContent = money(delivery);
+      document.getElementById("cartTotal").textContent = money(gross);
+      document.getElementById("cartCash").textContent = money(Math.max(0, gross - spend));
+      document.getElementById("pointsHint").textContent = `Доступно: ${pointsAvail} · можно списать до ${Math.min(pointsAvail, gross)}`;
+      const rate = state.user ? Number(state.user.loyalty_rate || 1) : 1;
+      const cash = Math.max(0, gross - spend);
+      document.getElementById("earnHint").textContent =
+        entries.length ? `После оплаты заказа начислим ≈ ${Math.floor(cash * rate / 100)} баллов (${rate}%)` : "";
+      if (state.user) {
+        document.getElementById("nameInput").value = state.user.name || document.getElementById("nameInput").value;
+        document.getElementById("phoneInput").value = state.user.phone || document.getElementById("phoneInput").value;
+        document.getElementById("addressInput").value = state.user.address || document.getElementById("addressInput").value;
+      }
+    }
+
+    async function renderAccount() {
+      if (!state.user) return;
+      document.getElementById("accPoints").textContent = String(state.user.loyalty_points || 0);
+      document.getElementById("accTier").textContent = `Текущий кэшбэк: ${state.user.loyalty_rate || 1}% · покупок на ${money(state.user.lifetime_spent || 0)}`;
+      const prog = state.user.loyalty_progress || {};
+      document.getElementById("accProgress").textContent = prog.next_rate
+        ? `До ${prog.next_rate}% осталось ${money(prog.remaining || 0)}`
+        : "Максимальный уровень лояльности";
+      document.getElementById("accName").value = state.user.name || "";
+      document.getElementById("accPhone").value = state.user.phone || "";
+      document.getElementById("accAddress").value = state.user.address || "";
+
+      const hist = document.getElementById("orderHistory");
+      try {
+        const data = await api("/api/orders", {});
+        const orders = data.orders || [];
+        if (!orders.length) hist.textContent = "Заказов пока нет";
+        else hist.innerHTML = orders.map(o =>
+          `<div style="margin:8px 0;padding-bottom:8px;border-bottom:1px solid var(--line)">
+            <strong>${escapeHtml(o.order_number)}</strong> · ${escapeHtml(o.status)}<br/>
+            ${money(o.final_total)} · баллы −${o.points_spent || 0} / +${o.points_earned || 0}
+           </div>`
+        ).join("");
+      } catch (e) {
+        hist.textContent = e.message || "Не удалось загрузить заказы";
+      }
+
+      const adminBox = document.getElementById("adminBox");
+      if (state.user.is_manager) {
+        adminBox.style.display = "block";
+        renderAdmin();
+      } else {
+        adminBox.style.display = "none";
+      }
+    }
+
+    function catOptions(selected) {
+      return state.categories.map(c =>
+        `<option value="${escapeHtml(c.id)}" ${c.id === selected ? "selected" : ""}>${escapeHtml(c.title)}</option>`
+      ).join("");
+    }
+
+    function bindPhotoPreview(fileInputId, imgId) {
+      const input = document.getElementById(fileInputId);
+      const img = document.getElementById(imgId);
+      if (!input || !img) return;
+      input.onchange = () => {
+        const f = input.files && input.files[0];
+        if (!f) return;
+        const url = URL.createObjectURL(f);
+        img.src = url;
+      };
+    }
+
+    function renderProductForm(p) {
+      const isEdit = !!p;
+      const title = isEdit ? "Редактирование товара" : "Новый товар";
+      const preview = isEdit ? cover(p) : PLACEHOLDER_IMG;
+      return `
+        <div class="muted" style="margin-bottom:8px">${title}</div>
+        <img class="admin-preview" id="npPreview" src="${preview}" alt=""/>
+        <div class="field"><label>Фото</label><input id="npFile" type="file" accept="image/*"/></div>
+        <div class="field"><label>Название</label><input id="npName" value="${escapeHtml(isEdit ? p.name : "")}"/></div>
+        <div class="field"><label>Бренд</label><input id="npBrand" value="${escapeHtml(isEdit ? (p.brand || "") : "")}" placeholder="Например, Reuzel"/></div>
+        <div class="field"><label>Описание</label><textarea id="npDesc" rows="4">${escapeHtml(isEdit ? (p.description || "") : "")}</textarea></div>
+        <div class="field"><label>Цена</label><input id="npPrice" type="number" min="0" value="${isEdit ? Number(p.price || 0) : ""}"/></div>
+        <div class="field"><label>Остаток</label><input id="npStock" type="number" min="0" value="${isEdit ? Number(p.stock || 0) : 0}"/></div>
+        <div class="field"><label>Категория</label>
+          <select id="npCat">${catOptions(isEdit ? p.category : (state.categories[0] && state.categories[0].id))}</select>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" id="npCancel" type="button">Отмена</button>
+          <button class="btn btn-gold" id="npSave" type="button">${isEdit ? "Сохранить" : "Создать"}</button>
+        </div>
+        <div class="muted" id="npMsg" style="margin-top:8px"></div>`;
+    }
+
+    function renderAdminBrandsList(body) {
+      const brands = Array.isArray(state.brands) ? state.brands : [];
+      body.innerHTML = brands.map((b) => {
+        const id = escapeHtml(b.id || b.name || "");
+        const name = String(b.name || "");
+        const photo = b.photo || b.image_url
+          ? resolveMedia(b.photo || b.image_url)
+          : brandAvatarFallback(name);
+        return `<div class="admin-item">
+          <img class="admin-preview-brand" id="brandPreview-${id}" src="${photo}" alt=""/>
+          <strong>${escapeHtml(name)}</strong>
+          <div class="muted">${escapeHtml(b.id || "")}</div>
+          <div class="field" style="margin-top:8px"><label>Название</label>
+            <input id="brandName-${id}" value="${escapeHtml(name)}"/></div>
+          <div class="field"><label>Фото бренда</label>
+            <input id="brandFile-${id}" type="file" accept="image/*"/></div>
+          <div class="btn-row">
+            <button class="btn btn-ghost" type="button" data-save-brand="${id}">Сохранить</button>
+            <button class="btn" type="button" data-del-brand="${id}" style="background:var(--danger)">Удалить</button>
+          </div>
+        </div>`;
+      }).join("") + `<div class="field" style="margin-top:12px"><label>Новый бренд</label>
+        <input id="newBrandName" placeholder="Например, Reuzel"/>
+        <div class="field" style="margin-top:8px"><label>Фото (опционально)</label>
+          <input id="newBrandFile" type="file" accept="image/*"/></div>
+        <button class="btn btn-gold" id="addBrandBtn" type="button" style="width:100%;margin-top:8px">Добавить бренд</button>
+        <div class="muted" id="brandAdminMsg" style="margin-top:8px"></div>
+      </div>`;
+
+      const addBtn = body.querySelector("#addBrandBtn");
+      if (addBtn) addBtn.onclick = async () => {
+        const msg = document.getElementById("brandAdminMsg");
+        const name = document.getElementById("newBrandName").value.trim();
+        if (name.length < 2) {
+          if (msg) msg.textContent = "Укажите название бренда";
+          return;
+        }
+        try {
+          const created = await api("/api/admin/brands", { action: "upsert", name });
+          const file = document.getElementById("newBrandFile").files[0];
+          if (file && created.brand) {
+            await uploadBrandImage(created.brand.id, created.brand.name, file);
+          }
+          if (msg) msg.textContent = "Бренд добавлен";
+          await loadBrands();
+          renderAdmin();
+          renderBrands();
+        } catch (e) {
+          if (msg) msg.textContent = e.message || "Ошибка";
+        }
+      };
+
+      body.querySelectorAll("[data-save-brand]").forEach((btn) => {
+        btn.onclick = async () => {
+          const id = btn.getAttribute("data-save-brand");
+          const name = (document.getElementById(`brandName-${id}`) || {}).value;
+          if (!name || !String(name).trim()) return;
+          await api("/api/admin/brands", {
+            action: "upsert",
+            id,
+            name: String(name).trim(),
+          });
+          const fileInput = document.getElementById(`brandFile-${id}`);
+          const file = fileInput && fileInput.files && fileInput.files[0];
+          if (file) await uploadBrandImage(id, String(name).trim(), file);
+          await loadBrands();
+          await loadProducts();
+          renderAdmin();
+          renderBrands();
+        };
+      });
+
+      body.querySelectorAll("[data-del-brand]").forEach((btn) => {
+        btn.onclick = async () => {
+          if (!confirm("Удалить бренд из списка? Товары сохранят поле brand.")) return;
+          await api("/api/admin/brands", {
+            action: "delete",
+            id: btn.getAttribute("data-del-brand"),
+          });
+          await loadBrands();
+          renderAdmin();
+          renderBrands();
+        };
+      });
+    }
+
+    function renderAdmin() {
+      const body = document.getElementById("adminBody");
+      if (state.adminTab === "categories") {
+        body.innerHTML = state.categories.map(c =>
+          `<div class="admin-item">
+            <img class="admin-preview" src="${categoryCover(c)}" alt=""/>
+            <strong>${escapeHtml(c.title)}</strong>
+            <div class="muted">${escapeHtml(c.id)}</div>
+            <div class="field" style="margin-top:8px"><label>Название</label>
+              <input id="catTitle-${escapeHtml(c.id)}" value="${escapeHtml(c.title)}"/></div>
+            <div class="field"><label>Новая обложка</label>
+              <input id="catFile-${escapeHtml(c.id)}" type="file" accept="image/*"/></div>
+            <button class="btn btn-ghost" type="button" data-save-cat="${escapeHtml(c.id)}">Сохранить</button>
+          </div>`
+        ).join("") + `<div class="field" style="margin-top:12px"><label>Новая категория</label>
+          <input id="newCatTitle" placeholder="Название"/>
+          <button class="btn btn-gold" id="addCatBtn" type="button" style="width:100%;margin-top:8px">Добавить</button></div>`;
+        const addBtn = body.querySelector("#addCatBtn");
+        if (addBtn) addBtn.onclick = async () => {
+          const title = document.getElementById("newCatTitle").value.trim();
+          if (!title) return;
+          await api("/api/admin/categories", { action: "upsert", title });
+          await loadCategories();
+          renderAdmin();
+          renderGroups();
+        };
+        body.querySelectorAll("[data-save-cat]").forEach(btn => btn.onclick = async () => {
+          const id = btn.getAttribute("data-save-cat");
+          const title = (document.getElementById(`catTitle-${id}`) || {}).value;
+          if (!title || !String(title).trim()) return;
+          await api("/api/admin/categories", { action: "upsert", id, title: String(title).trim() });
+          await loadCategories();
+          renderAdmin();
+          renderGroups();
+        });
+        return;
+      }
+
+      if (state.adminTab === "brands") {
+        body.innerHTML = `<div class="muted">Загрузка брендов…</div>`;
+        (async () => {
+          try {
+            const data = await api("/api/admin/brands", { action: "list" });
+            state.brands = Array.isArray(data.brands) ? data.brands : [];
+          } catch (e) {
+            body.innerHTML = `<div class="empty">${escapeHtml(e.message || "Не удалось загрузить бренды")}</div>`;
+            return;
+          }
+          renderAdminBrandsList(body);
+        })();
+        return;
+      }
+
+      if (state.adminTab === "new") {
+        state.editingProductId = null;
+        body.innerHTML = renderProductForm(null);
+        bindPhotoPreview("npFile", "npPreview");
+        body.querySelector("#npCancel").onclick = () => {
+          state.adminTab = "products";
+          document.querySelectorAll("[data-admin]").forEach(t => t.classList.toggle("active", t.dataset.admin === "products"));
+          renderAdmin();
+        };
+        body.querySelector("#npSave").onclick = createProductAdmin;
+        return;
+      }
+
+      if (state.adminTab === "edit" && state.editingProductId) {
+        const p = state.products.find(x => x.id === state.editingProductId);
+        if (!p) {
+          state.adminTab = "products";
+          state.editingProductId = null;
+        } else {
+          body.innerHTML = renderProductForm(p);
+          bindPhotoPreview("npFile", "npPreview");
+          body.querySelector("#npCancel").onclick = () => {
+            state.adminTab = "products";
+            state.editingProductId = null;
+            document.querySelectorAll("[data-admin]").forEach(t => t.classList.toggle("active", t.dataset.admin === "products"));
+            renderAdmin();
+          };
+          body.querySelector("#npSave").onclick = () => saveProductAdmin(p.id);
+          return;
+        }
+      }
+
+      body.innerHTML = state.products.map(p =>
+        `<div class="admin-item">
+          <div class="admin-item-top">
+            <img class="admin-preview" src="${cover(p)}" alt="" style="margin:0"/>
+            <div class="admin-item-meta">
+              <strong>${escapeHtml(p.name)}</strong>
+              <div class="muted">${escapeHtml(p.brand || "—")} · ${money(p.price)} · остаток ${p.stock} · ${escapeHtml(catTitle(p.category))}</div>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-ghost" type="button" data-edit="${p.id}">Править</button>
+            <button class="btn" type="button" data-del="${p.id}" style="background:var(--danger)">Удалить</button>
+          </div>
+        </div>`
+      ).join("") || `<div class="empty">Товаров нет</div>`;
+      body.querySelectorAll("[data-del]").forEach(btn => btn.onclick = async () => {
+        if (!confirm("Удалить товар?")) return;
+        await api("/api/admin/products", { action: "delete", id: Number(btn.getAttribute("data-del")) });
+        await loadProducts();
+        renderAdmin();
+        renderGroups();
+      });
+      body.querySelectorAll("[data-edit]").forEach(btn => btn.onclick = () => {
+        state.editingProductId = Number(btn.getAttribute("data-edit"));
+        state.adminTab = "edit";
+        document.querySelectorAll("[data-admin]").forEach(t => t.classList.remove("active"));
+        renderAdmin();
+      });
+    }
+
+    function catTitle(id) {
+      const c = state.categories.find(x => x.id === id);
+      return c ? c.title : (id || "");
+    }
+
+    async function createProductAdmin() {
+      const msg = document.getElementById("npMsg");
+      try {
+        const created = await api("/api/admin/products", {
+          action: "create",
+          name: document.getElementById("npName").value.trim(),
+          brand: document.getElementById("npBrand").value.trim(),
+          description: document.getElementById("npDesc").value.trim(),
+          price: Number(document.getElementById("npPrice").value || 0),
+          stock: Number(document.getElementById("npStock").value || 0),
+          category: document.getElementById("npCat").value,
+        });
+        const file = document.getElementById("npFile").files[0];
+        if (file && created.product) await uploadImage(created.product.id, file);
+        msg.textContent = "Товар создан";
+        await loadProducts();
+        state.adminTab = "products";
+        document.querySelectorAll("[data-admin]").forEach(t => t.classList.toggle("active", t.dataset.admin === "products"));
+        renderAdmin();
+        renderGroups();
+      } catch (e) {
+        msg.textContent = e.message || "Ошибка";
+      }
+    }
+
+    async function saveProductAdmin(id) {
+      const msg = document.getElementById("npMsg");
+      try {
+        await api("/api/admin/products", {
+          action: "update",
+          id,
+          name: document.getElementById("npName").value.trim(),
+          brand: document.getElementById("npBrand").value.trim(),
+          description: document.getElementById("npDesc").value.trim(),
+          price: Number(document.getElementById("npPrice").value || 0),
+          stock: Number(document.getElementById("npStock").value || 0),
+          category: document.getElementById("npCat").value,
+        });
+        const file = document.getElementById("npFile").files[0];
+        if (file) await uploadImage(id, file);
+        msg.textContent = "Сохранено";
+        await loadProducts();
+        state.adminTab = "products";
+        state.editingProductId = null;
+        document.querySelectorAll("[data-admin]").forEach(t => t.classList.toggle("active", t.dataset.admin === "products"));
+        renderAdmin();
+        renderGroups();
+        renderProducts();
+      } catch (e) {
+        msg.textContent = e.message || "Ошибка";
+      }
+    }
+
+    async function uploadImage(productId, file) {
+      const fd = new FormData();
+      fd.append("initData", initData());
+      fd.append("product_id", String(productId));
+      fd.append("file", file);
+      const res = await fetch(`${API_BASE_URL}/api/admin/upload`, { method: "POST", body: fd });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || "upload failed");
+      return data;
+    }
+
+    async function uploadBrandImage(brandId, brandName, file) {
+      const fd = new FormData();
+      fd.append("initData", initData());
+      if (brandId) fd.append("brand_id", String(brandId));
+      if (brandName) fd.append("brand_name", String(brandName));
+      fd.append("file", file);
+      const res = await fetch(`${API_BASE_URL}/api/admin/upload`, { method: "POST", body: fd });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || "upload failed");
+      return data;
+    }
+
+    async function loadProducts() {
+      const res = await fetch(`${API_BASE_URL}/api/products`);
+      const data = await res.json();
+      state.products = data.products || [];
+      if (state.selectedBrand) {
+        const selected = state.selectedBrand.toLowerCase();
+        const hasBrand = state.products.some((p) => productBrand(p).toLowerCase() === selected);
+        if (!hasBrand) state.selectedBrand = "";
+      }
+      renderProducts();
+      // После обновления списка товаров пересобираем и блок брендов, чтобы
+      // подсветка и картинки оставались актуальными.
+      renderBrands();
+      updateCartBadge();
+    }
+    async function loadBrands() {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/brands`);
+        const data = await res.json();
+        state.brands = Array.isArray(data.brands) ? data.brands : [];
+        if (state.selectedBrand) {
+          const selected = state.selectedBrand.toLowerCase();
+          const hasSelected = state.brands.some((b) => String(b.name || "").trim().toLowerCase() === selected);
+          if (!hasSelected) state.selectedBrand = "";
+        }
+      } catch (_) {
+        state.brands = [];
+      }
+      renderBrands();
+    }
+    async function loadCategories() {
+      const res = await fetch(`${API_BASE_URL}/api/categories`);
+      const data = await res.json();
+      state.categories = data.categories || [];
+      renderGroups();
+    }
+    async function loadMe() {
+      try {
+        const data = await api("/api/me", {});
+        state.user = data.user;
+        state.favorites = new Set(data.favorite_ids || []);
+        applyCart(data.cart || {});
+      } catch (e) {
+        console.warn("me", e);
+        state.user = { name: "", phone: "", address: "", loyalty_points: 0, loyalty_rate: 1, lifetime_spent: 0, is_manager: false };
+      }
+    }
+
+    document.querySelectorAll(".nav-btn").forEach(btn => {
+      btn.onclick = () => setPanel(btn.dataset.panel);
+    });
+    document.getElementById("searchInput").addEventListener("input", (e) => {
+      state.query = e.target.value || "";
+      renderProducts();
+    });
+    document.getElementById("sortSelect").addEventListener("change", (e) => {
+      state.sortBy = e.target.value || "default";
+      renderProducts();
+    });
+    document.getElementById("pointsInput").addEventListener("input", renderCart);
+    document.getElementById("productModalCloseX").onclick = closeProduct;
+    document.getElementById("productModalBg").onclick = (e) => { if (e.target.id === "productModalBg") closeProduct(); };
+    document.getElementById("productModalAdd").onclick = () => {
+      if (state.activeProductId) addToCart(state.activeProductId);
+      closeProduct();
+      setPanel("cart");
+    };
+    document.getElementById("productModalFav").onclick = () => {
+      if (state.activeProductId) toggleFav(state.activeProductId);
+    };
+    document.getElementById("saveProfileBtn").onclick = async () => {
+      const msg = document.getElementById("profileMsg");
+      try {
+        const data = await api("/api/profile", {
+          name: document.getElementById("accName").value.trim(),
+          phone: document.getElementById("accPhone").value.trim(),
+          address: document.getElementById("accAddress").value.trim(),
+        });
+        state.user = data.user;
+        msg.style.display = "block";
+        msg.textContent = "Сохранено";
+      } catch (e) {
+        msg.style.display = "block";
+        msg.textContent = e.message || "Ошибка";
+      }
+    };
+    document.getElementById("submitOrderBtn").onclick = async () => {
+      const msg = document.getElementById("orderMsg");
+      const btn = document.getElementById("submitOrderBtn");
+      // Защита от двойной отправки: иногда при повторном тапе можно получить 2 заказа,
+      // а затем списание со склада пройдёт дважды.
+      if (window.__submitting_order) return;
+      msg.style.display = "block";
+      const items = Object.entries(state.cart).map(([id, quantity]) => ({ id: Number(id), quantity }));
+      if (!items.length) { msg.textContent = "Корзина пуста"; return; }
+      window.__submitting_order = true;
+      btn.disabled = true;
+      const addr = document.getElementById("addressInput").value.trim();
+      if (addr.length < 5) {
+        msg.className = "muted";
+        msg.textContent = "Укажите адрес доставки";
+        window.__submitting_order = false;
+        btn.disabled = false;
+        return;
+      }
+      try {
+        const data = await api("/api/order", {
+          items,
+          points_to_spend: Number(document.getElementById("pointsInput").value || 0),
+          idempotency_key: (window.crypto && crypto.randomUUID)
+            ? crypto.randomUUID()
+            : (`${Date.now()}-${Math.random().toString(16).slice(2)}`),
+          user: {
+            name: document.getElementById("nameInput").value.trim(),
+            phone: document.getElementById("phoneInput").value.trim(),
+            address: document.getElementById("addressInput").value.trim(),
+          },
+        });
+        state.cart = {};
+        updateCartBadge();
+        persistCartSoon();
+        await loadMe();
+        renderCart();
+        const details = (data.payment_details || "").trim();
+        msg.className = "pay-box";
+        msg.style.display = "block";
+        msg.innerHTML =
+          `<div class="pay-box-title">Заказ ${escapeHtml(data.order_number)} оформлен</div>` +
+          `<div>К оплате</div>` +
+          `<div class="pay-box-amount">${money(data.cash_paid)}</div>` +
+          (details
+            ? `<div class="pay-box-title">Реквизиты для оплаты</div><div class="pay-box-details">${escapeHtml(details)}</div>`
+            : "") +
+          `<div class="pay-box-note">Те же реквизиты отправлены вам сообщением в боте — их удобно скопировать из чата.</div>`;
+        msg.scrollIntoView({ behavior: "smooth", block: "center" });
+        try { window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred?.("success"); } catch (_) {}
+      } catch (e) {
+        msg.className = "muted";
+        msg.style.display = "block";
+        msg.textContent = e.message || "Ошибка оформления";
+      } finally {
+        window.__submitting_order = false;
+        btn.disabled = false;
+      }
+    };
+    document.getElementById("btnWrite").onclick = async () => {
+      try {
+        const data = await api("/api/contact-manager", {});
+        alert(data.message || "Менеджер уведомлён");
+      } catch (e) {
+        alert(e.message || "Не удалось связаться");
+      }
+    };
+    document.querySelectorAll("[data-admin]").forEach(tab => {
+      tab.onclick = () => {
+        state.adminTab = tab.dataset.admin;
+        state.editingProductId = null;
+        document.querySelectorAll("[data-admin]").forEach(t => t.classList.toggle("active", t === tab));
+        renderAdmin();
+      };
+    });
+
+    (async function boot() {
+      document.getElementById("heroImg").src = IMG("static/img/banner-desktop.png");
+      document.getElementById("shopLogo").src = IMG("static/img/logo.png");
+      bindAddressSuggest("addressInput", "addressSuggest");
+      bindAddressSuggest("accAddress", "accAddressSuggest");
+      await Promise.all([loadCategories(), loadProducts(), loadBrands(), loadMe()]);
+      renderProducts();
+      renderGroups();
+      renderBrands();
+    })().catch(err => {
+      document.getElementById("products").innerHTML = `<div class="empty">Ошибка: ${escapeHtml(err.message)}</div>`;
+    });
+  </script>
+</body>
+</html>
